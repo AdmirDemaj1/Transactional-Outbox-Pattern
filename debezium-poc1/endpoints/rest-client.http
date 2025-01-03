@@ -1,0 +1,9 @@
+### Insert a new student
+POST http://localhost:3000/students
+Content-Type: application/json
+
+{
+  "name": "John Doe 4",
+  "email": "john.doe@example.com 4",
+  "address": "123 Main St 2"
+}
