@@ -4,7 +4,7 @@ services:
   # Install postgres and setup the student database.
   postgres:
     container_name: postgres
-    image: quay.io/debezium/example-postgres:${DEBEZIUM_VERSION}
+    image: quay.io/debezium/postgres:13
     ports:
       - 5432:5432
     healthcheck:

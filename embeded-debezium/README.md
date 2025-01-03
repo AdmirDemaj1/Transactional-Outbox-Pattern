@@ -5,10 +5,14 @@ Blog URL: https://medium.com/@sohan_ganapathy/change-data-capture-cdc-with-embed
 ## Prerequisites
 - [Docker](https://docs.docker.com/v17.09/engine/installation/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
+- [Nestjs]
 
-## Installing required tools
+
+## Starting docker images
 
 Once the prerequisites are installed, run the command.
+
+In `embeded-debezium`:
 
 ```shell
 export DEBEZIUM_VERSION=2.4
@@ -16,39 +20,31 @@ export DEBEZIUM_CONNECTOR_VERSION=2.4.0.Alpha2
 docker-compose up -d
 ```
 
-## Student table
-
-```sql
-CREATE TABLE public.student
-(
-    id integer NOT NULL,
-    address character varying(255),
-    email character varying(255),
-    name character varying(255),
-    CONSTRAINT student_pkey PRIMARY KEY (id)
-);
-```
-
 ## Starting the SpringBoot application
 
-Go to the folder `student-cdc-relay`, run the command
+Go into student-cdc-relay folder and run
 
 ```shell
 mvn spring-boot:run
 ```
 
-## Scripts to Insert, Update and Delete a record on Postgres
 
-```sql
-INSERT INTO STUDENT(ID, NAME, ADDRESS, EMAIL) VALUES('1','Jack','Dallas, TX','jack@gmail.com');
+## Starting the Nestjs Application
 
-UPDATE STUDENT SET EMAIL='jill@gmail.com', NAME='Jill' WHERE ID = 1; 
-
-DELETE FROM STUDENT WHERE ID = 1;
-```
-
-## Elasticsearch commands to test if CDC worked !
-
+1. Navigate into `debezium-endpoints`
+2. Run:
 ```shell
-curl -X GET http://localhost:9200/student/student/1?pretty=true
+npm install -g @nestjs/cli
+nest --version
+npm run start
 ```
+3. Install `REST Client` from extensions to test the endpoint
+4. Run `npm run start`
+5. Test the endpoint into rest-client.http by clicking Send Request
+
+## Check if everything worked
+
+1. Go into your local pgAdmin and check if a new record was added into studentdb -> public tables -> students
+2. Open `http://localhost:9000/topic/student-topic` or `http://localhost:9000/` and you should see the umber of created messages there
+3. Try to call the request multiple times and it should generate a new message for each successful request
+

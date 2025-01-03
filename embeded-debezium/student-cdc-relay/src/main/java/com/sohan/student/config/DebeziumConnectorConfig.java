@@ -14,9 +14,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DebeziumConnectorConfig {
 
-    /**
-     * Student Database details.
-     */
     @Value("${student.datasource.host}")
     private String studentDBHost;
 
@@ -32,32 +29,42 @@ public class DebeziumConnectorConfig {
     @Value("${student.datasource.password}")
     private String studentDBPassword;
 
-    private String STUDENT_TABLE_NAME = "public.student";
+    private final String STUDENT_TABLE_NAME = "public.student";
 
-    /**
-     * Student database connector.
-     *
-     * @return Configuration.
-     */
     @Bean
     public io.debezium.config.Configuration studentConnector() {
-
-        return io.debezium.config.Configuration.create().
-            with("name", "student-postgres-connector").
-            with("connector.class", "io.debezium.connector.postgresql.PostgresConnector").
-            with("offset.storage", "org.apache.kafka.connect.storage.FileOffsetBackingStore").
-            with("offset.storage.file.filename", "/tmp/offsets.dat").
-            with("offset.flush.interval.ms", "60000").
-            /* begin connector properties */
-            with("database.hostname", studentDBHost).
-            with("database.port", studentDBPort).
-            with("database.user", studentDBUserName).
-            with("database.password", studentDBPassword).
-            with("database.dbname", studentDBName).
-            with("table.whitelist", STUDENT_TABLE_NAME).
-            with("topic.prefix", "my-app-connector").
-            with("slot.name", "my_slot_name02").
-            with("schema.history.internal", "io.debezium.storage.file.history.FileSchemaHistory").
-            with("schema.history.internal.file.filename", "/tmp/schemahistory.dat").build();
+        return io.debezium.config.Configuration.create()
+            .with("name", "student-postgres-connector")
+            .with("connector.class", "io.debezium.connector.postgresql.PostgresConnector")
+            .with("database.hostname", studentDBHost)
+            .with("database.port", studentDBPort)
+            .with("database.user", studentDBUserName)
+            .with("database.password", studentDBPassword)
+            .with("database.dbname", studentDBName)
+            .with("topic.prefix", "student-postgres")  // Added this line
+            .with("table.include.list", STUDENT_TABLE_NAME)
+            .with("plugin.name", "pgoutput")
+            .with("slot.name", "my_slot_name02")
+            
+            // Connection stability settings
+            .with("max.queue.size", "8192")
+            .with("max.batch.size", "2048")
+            .with("poll.interval.ms", "1000")
+            .with("heartbeat.interval.ms", "5000")
+            .with("database.tcpKeepAlive", "true")
+            
+            // Snapshot settings
+            .with("snapshot.mode", "initial")
+            .with("snapshot.fetch.size", "10240")
+            .with("snapshot.lock.timeout.ms", "10000")
+            
+            // Storage settings
+            .with("offset.storage", "org.apache.kafka.connect.storage.FileOffsetBackingStore")
+            .with("offset.storage.file.filename", "/tmp/offsets.dat")
+            .with("offset.flush.interval.ms", "60000")
+            .with("schema.history.internal", "io.debezium.storage.file.history.FileSchemaHistory")
+            .with("schema.history.internal.file.filename", "/tmp/schema-history.dat")
+            
+            .build();
     }
 }

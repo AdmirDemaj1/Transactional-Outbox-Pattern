@@ -1,3 +1,4 @@
 kafka:
   topic:
     student: student-topic
+
